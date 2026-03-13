@@ -22,7 +22,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
@@ -80,7 +80,7 @@ main {
 }
 
 .chat-window {
-  flex: 2;
+  flex: 1;
   background: var(--card-bg);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--border-radius);
@@ -93,7 +93,7 @@ main {
 }
 
 .video-preview-container {
-  flex: 1;
+  flex: 3;
   background: #000;
   border-radius: var(--border-radius);
   border: 1px solid rgba(255, 255, 255, 0.1);

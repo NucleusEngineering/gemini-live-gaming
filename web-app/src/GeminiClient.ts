@@ -16,6 +16,7 @@ export class GeminiClient {
   private onEvent: (event: GeminiEvent) => void;
   private isRunning = false;
   private nextPlayTime = 0;
+  private lastFrameData: string | null = null;
 
   constructor(onEvent: (event: GeminiEvent) => void, videoElement?: HTMLVideoElement) {
     this.onEvent = onEvent;
@@ -65,6 +66,7 @@ export class GeminiClient {
     this.micStream = null;
     this.screenStream = null;
     this.audioContext = null;
+    this.lastFrameData = null;
   }
 
   private arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -130,29 +132,28 @@ export class GeminiClient {
 
       const ctx = this.canvas.getContext("2d");
       if (ctx) {
-        // Target 640x480 for better performance and to avoid 1007 errors
-        const ratio = this.videoElement.videoWidth / this.videoElement.videoHeight;
-        let width = 640;
-        let height = 640 / ratio;
-        if (height > 480) {
-          height = 480;
-          width = 480 * ratio;
-        }
+        // Use original resolution
+        const width = this.videoElement.videoWidth;
+        const height = this.videoElement.videoHeight;
+
         this.canvas.width = width;
         this.canvas.height = height;
         ctx.drawImage(this.videoElement, 0, 0, width, height);
 
-        const jpeg = this.canvas.toDataURL("image/jpeg", 0.6);
+        const jpeg = this.canvas.toDataURL("image/jpeg", 0.7);
         const base64 = jpeg.split(",")[1];
         if (base64 && base64.length > 0) {
-          this.ws.send(JSON.stringify({ type: "video", data: base64 }));
+          if (base64 !== this.lastFrameData) {
+            this.ws.send(JSON.stringify({ type: "video", data: base64 }));
+            this.lastFrameData = base64;
+          }
         } else {
           console.warn("Skipping empty video frame");
         }
       }
 
       if (this.isRunning) {
-        setTimeout(stream, 200); // 5 FPS
+        setTimeout(stream, 1000); // 1 FPS
       }
     };
     stream();
