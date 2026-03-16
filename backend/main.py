@@ -116,6 +116,15 @@ def ensure_file_search_store(client: genai.Client, store_name: str, file_path: s
         logger.error(f"Error in ensure_file_search_store: {e}")
         return None
 
+def control_movement(action: str) -> str:
+    """
+    Controls the character movement in Unity.
+    Args:
+        action (str): The action to perform. Can be "START_FORWARD" or "STOP".
+    """
+    logger.info(f"Movement action triggered: {action}")
+    return f"Movement action '{action}' triggered."
+
 # Prepare System Instruction with README context
 base_instruction = """
 You are UniAgent, a helpful Unity game development assistant.
@@ -126,6 +135,11 @@ Keep responses concise and helpful.
 
 You have access to the project's file structure and can read files using the provided tools.
 Use 'get_project_context' to see what files are available and 'read_project_file' to study their implementation.
+
+You can also control the game movement. 
+When the user says "move forward", call 'control_movement' with action "START_FORWARD".
+When the user says "Stop", call 'control_movement' with action "STOP".
+Always confirm to the user that you are triggering the movement.
 """
 
 try:
@@ -177,10 +191,11 @@ async def websocket_endpoint(websocket: WebSocket):
         model=MODEL, 
         input_sample_rate=16000,
         system_instruction=system_instruction,
-        tools=[get_project_context, read_project_file],
+        tools=[get_project_context, read_project_file, control_movement],
         tool_mapping={
             "get_project_context": get_project_context,
-            "read_project_file": read_project_file
+            "read_project_file": read_project_file,
+            "control_movement": control_movement
         },
         file_search_store_names=file_search_store_names
     )

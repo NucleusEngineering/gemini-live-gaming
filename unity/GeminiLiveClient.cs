@@ -27,12 +27,21 @@ public class GeminiLiveClient : MonoBehaviour
     public class GeminiMessage
     {
         public string type;
-        public string data;
+        public string data;     // For audio/text/video
+        public string name;     // For tool_call
+        public ToolArgs args;   // For tool_call
+    }
+
+    [Serializable]
+    public class ToolArgs
+    {
+        public string action;
     }
 
     // Events that other scripts can subscribe to
     public event Action<string> OnTextReceived;
     public event Action<byte[]> OnAudioReceived;
+    public event Action<string, string> OnToolCallReceived; // name, action
 
     private void Awake()
     {
@@ -109,6 +118,11 @@ public class GeminiLiveClient : MonoBehaviour
                 {
                     byte[] audioBytes = Convert.FromBase64String(message.data);
                     OnAudioReceived?.Invoke(audioBytes);
+                }
+                else if (message.type == "tool_call")
+                {
+                    Debug.Log($"GeminiLiveClient: Tool call received - {message.name} with action {message.args?.action}");
+                    OnToolCallReceived?.Invoke(message.name, message.args?.action);
                 }
             }
             catch (Exception e)
