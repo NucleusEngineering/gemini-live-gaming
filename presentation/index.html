@@ -115,6 +115,54 @@
       letter-spacing: 2px;
     }
 
+    .placeholder-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+      opacity: 0.7;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .placeholder-box img:hover {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+
+    /* Lightbox Styles */
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      cursor: zoom-out;
+      backdrop-filter: blur(8px);
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    .lightbox.active img {
+      transform: scale(1);
+    }
+
     .navigation-hint {
       position: absolute;
       bottom: 2rem;
@@ -216,7 +264,7 @@
       <section class="slide active">
         <h1 class="animate">Gemini Live Gamedev Assistant</h1>
         <p class="animate delay-1">Real-time Multimodal Pair Programming for Unity & Co.</p>
-        <div class="placeholder-box animate delay-2">[Hero Image: Unity Editor with Gemini Overlay]</div>
+        <div class="placeholder-box animate delay-2"><img src="images/unity.png" alt="Hero Image"></div>
         <div class="animate delay-3">
           <p>Press <strong>Right Arrow</strong> to begin</p>
         </div>
@@ -239,7 +287,7 @@
             <p>Web-based interface for screen share and live chat history.</p>
           </div>
         </div>
-        <div class="placeholder-box animate delay-2">[Diagram: Unity <-> Backend <-> Gemini API]</div>
+        <div class="placeholder-box animate delay-2"><img src="images/diagram.png" alt="Hero Image"></div>
       </section>
 
       <!-- Slide 3: Backend Middleware -->
@@ -265,7 +313,7 @@
           <li>Gemini can "browse" your scripts to understand bug reports in full context.</li>
           <li>Automatic syncing of documentation files (e.g., STORYLINE.md).</li>
         </ul>
-        <div class="placeholder-box animate delay-2">[Image: Gemini explaining a C# script contextually]</div>
+        <div class="placeholder-box animate delay-2"><img src="images/code.png" alt="Hero Image"></div>
       </section>
 
       <!-- Slide 5: Unity Integration -->
@@ -277,7 +325,7 @@
           <li><strong>AudioReceiver</strong>: Real-time playback of Gemini's vocal response.</li>
           <li><strong>GeminiLiveClient</strong>: Core WebSocket manager for Unity.</li>
         </ul>
-        <div class="placeholder-box animate delay-2">[Image: Scripts in Unity Inspector]</div>
+        <div class="placeholder-box animate delay-2"><img src="images/unity_code.png" alt="Hero Image"></div>
       </section>
       
       <!-- Slide 6: Tool Calling -->
@@ -351,7 +399,7 @@
           <li>Live transcription history for auditing model logic.</li>
           <li>Integrated chat for hybrid voice/text workflows.</li>
         </ul>
-        <div class="placeholder-box animate delay-2">[Screenshot: Modern dark-mode Web App UI]</div>
+        <div class="placeholder-box animate delay-2"><img src="images/web-app.png" alt="Hero Image"></div>
       </section>
 
       <!-- Slide 9: Ease of Use -->
@@ -384,10 +432,16 @@
     </div>
   </div>
 
+  <div id="lightbox" class="lightbox">
+    <img id="lightbox-img" src="" alt="Full Size View">
+  </div>
+
   <script>
     const wrapper = document.getElementById('slides-wrapper');
     const slides = document.querySelectorAll('.slide');
     const progressBar = document.getElementById('progress-bar');
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightbox-img');
 
     let currentSlide = 0;
 
@@ -406,6 +460,28 @@
       progressBar.style.width = `${progress}%`;
     }
 
+      // Lightbox Logic
+      function openLightbox(src) {
+        lightboxImg.src = src;
+        lightbox.classList.add('active');
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove('active');
+      }
+
+      // Add click event to all images in placeholders
+      document.querySelectorAll('.placeholder-box img').forEach(img => {
+        img.addEventListener('click', (e) => {
+          openLightbox(e.target.src);
+        });
+      });
+
+      // Close lightbox on click outside or on the image itself
+      lightbox.addEventListener('click', () => {
+        closeLightbox();
+      });
+
     window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight') {
         if (currentSlide < slides.length - 1) {
@@ -417,6 +493,8 @@
           currentSlide--;
           updateSlide();
         }
+      } else if (e.key === 'Escape') {
+        closeLightbox();
       }
     });
 

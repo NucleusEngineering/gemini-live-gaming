@@ -123,7 +123,7 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <header>
-        <h1>Antigravity <span>Live</span></h1>
+        <h1>GameDev Assistant <span>Live</span></h1>
         <div className="status-badge" data-connected={isConnected}>
           {isConnected ? "Live Session" : "Disconnected"}
         </div>
