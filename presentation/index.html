@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini Live Gamedev Assistant Presentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0f0f12;
+      --text-color: #e0e0e0;
+      --accent-primary: #4285f4;
+      --accent-secondary: #9b51e0;
+      --accent-tertiary: #ea4335;
+      --slide-bg: #1a1a20;
+      --gradient: linear-gradient(135deg, #4285f4, #9b51e0, #ea4335);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .presentation-container {
+      height: 100%;
+      width: 100%;
+      position: relative;
+    }
+
+    .slides-wrapper {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+    }
+
+    .slide {
+      min-width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 4rem;
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent-primary);
+    }
+
+    p,
+    li {
+      font-size: 1.25rem;
+      line-height: 1.6;
+      max-width: 800px;
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      text-align: left;
+      margin-top: 1rem;
+      list-style: none;
+    }
+
+    li {
+      padding-left: 2rem;
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    li::before {
+      content: '✦';
+      position: absolute;
+      left: 0;
+      color: var(--accent-secondary);
+    }
+
+    .placeholder-box {
+      width: 600px;
+      height: 350px;
+      background: #252530;
+      border: 2px dashed #444;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 2rem 0;
+      border-radius: 12px;
+      color: #666;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .navigation-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 2rem;
+      opacity: 0.5;
+      font-size: 0.9rem;
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      background: var(--gradient);
+      transition: width 0.3s ease;
+    }
+
+    .code-snippet {
+      background: #000;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: left;
+      font-family: monospace;
+      border-left: 4px solid var(--accent-primary);
+      width: 90%;
+      max-width: 800px;
+    }
+
+    .architecture-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 2rem;
+    }
+
+    .arch-node {
+      background: #252530;
+      padding: 2rem;
+      border-radius: 16px;
+      border: 1px solid #333;
+      transition: transform 0.3s ease;
+    }
+
+    .arch-node:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent-secondary);
+    }
+
+    .arch-node h3 {
+      margin-bottom: 1rem;
+      color: var(--accent-primary);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .slide.active .animate {
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    .animate {
+      opacity: 0;
+    }
+
+    .delay-1 {
+      animation-delay: 0.2s;
+    }
+
+    .delay-2 {
+      animation-delay: 0.4s;
+    }
+
+    .delay-3 {
+      animation-delay: 0.6s;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="presentation-container">
+    <div class="slides-wrapper" id="slides-wrapper">
+
+      <!-- Slide 1: Title -->
+      <section class="slide active">
+        <h1 class="animate">Gemini Live Gamedev Assistant</h1>
+        <p class="animate delay-1">Real-time Multimodal Pair Programming for Unity & Co.</p>
+        <div class="placeholder-box animate delay-2">[Hero Image: Unity Editor with Gemini Overlay]</div>
+        <div class="animate delay-3">
+          <p>Press <strong>Right Arrow</strong> to begin</p>
+        </div>
+      </section>
+
+      <!-- Slide 2: Architecture -->
+      <section class="slide">
+        <h2 class="animate">System Architecture</h2>
+        <div class="architecture-grid animate delay-1">
+          <div class="arch-node">
+            <h3>Unity Client</h3>
+            <p>C# Scripts for screen capture, audio streaming, and receiver.</p>
+          </div>
+          <div class="arch-node">
+            <h3>Backend (FastAPI)</h3>
+            <p>Middleware bridging WebSockets to Google's GenAI SDK.</p>
+          </div>
+          <div class="arch-node">
+            <h3>Web App (React)</h3>
+            <p>Web-based interface for screen share and live chat history.</p>
+          </div>
+        </div>
+        <div class="placeholder-box animate delay-2">[Diagram: Unity <-> Backend <-> Gemini API]</div>
+      </section>
+
+      <!-- Slide 3: Backend Middleware -->
+      <section class="slide">
+        <h2 class="animate">Backend: The Bridge</h2>
+        <ul class="animate delay-1">
+          <li>Built with <strong>Python FastAPI</strong> and <strong>Uvicorn</strong>.</li>
+          <li>Asynchronous WebSocket handling for low-latency streaming.</li>
+          <li>Orchestrates Gemini sessions with <strong>resumption tokens</strong> for stability.</li>
+          <li>Manages queues for audio, video, and text inputs separately.</li>
+        </ul>
+        <div class="code-snippet animate delay-2">
+          <code>async with client.aio.live.connect(model=MODEL) as session: ...</code>
+        </div>
+      </section>
+
+      <!-- Slide 4: RAG & File Context -->
+      <section class="slide">
+        <h2 class="animate">RAG: Real-time Project Context</h2>
+        <ul class="animate delay-1">
+          <li>Dynamic file indexing using <strong>File Search Stores</strong> in Gemini.</li>
+          <li>Tools enabled: <code>get_project_context</code> and <code>read_project_file</code>.</li>
+          <li>Gemini can "browse" your scripts to understand bug reports in full context.</li>
+          <li>Automatic syncing of documentation files (e.g., STORYLINE.md).</li>
+        </ul>
+        <div class="placeholder-box animate delay-2">[Image: Gemini explaining a C# script contextually]</div>
+      </section>
+
+      <!-- Slide 5: Unity Integration -->
+      <section class="slide">
+        <h2 class="animate">Unity: The Primary Client</h2>
+        <ul class="animate delay-1">
+          <li><strong>ScreenStreamer</strong>: Efficient camera render to JPEG (1 FPS).</li>
+          <li><strong>AudioStreamer</strong>: Captures system microphone to PCM 16kHz.</li>
+          <li><strong>AudioReceiver</strong>: Real-time playback of Gemini's vocal response.</li>
+          <li><strong>GeminiLiveClient</strong>: Core WebSocket manager for Unity.</li>
+        </ul>
+        <div class="placeholder-box animate delay-2">[Image: Scripts in Unity Inspector]</div>
+      </section>
+
+      <!-- Slide 6: Efficiency Secrets -->
+      <section class="slide">
+        <h2 class="animate">Efficiency: Frame Skipping</h2>
+        <p class="animate delay-1">How we minimize bandwidth while maintaining multimodal understanding:</p>
+        <div class="code-snippet animate delay-2">
+          <code>if (base64 !== this.lastFrameData) { <br>
+                    &nbsp;&nbsp;this.ws.send(JSON.stringify({ type: "video", data: base64 }));<br>
+                    }</code>
+        </div>
+        <ul class="animate delay-3">
+          <li>The system hashes the current screenshot and compares it to the last.</li>
+          <li>If nothing changed (static editor), no video data is sent.</li>
+          <li>Saves significant bandwidth and model processing tokens.</li>
+        </ul>
+      </section>
+
+      <!-- Slide 7: Audio & Video Ops -->
+      <section class="slide">
+        <h2 class="animate">Transmission Details</h2>
+        <div class="architecture-grid animate delay-1">
+          <div class="arch-node">
+            <h3>Audio</h3>
+            <p>PCM 16kHz Mono. Balanced quality vs. payload size.</p>
+          </div>
+          <div class="arch-node">
+            <h3>Video</h3>
+            <p>JPEG @ 0.7 Quality. 1 FPS captures intent without overhead.</p>
+          </div>
+          <div class="arch-node">
+            <h3>Latency</h3>
+            <p>Sub-500ms response time for a "natural" feel.</p>
+          </div>
+        </div>
+        <div class="animate delay-2">
+          <p>Why it matters: Direct visual feedback is faster than describing bugs via text.</p>
+        </div>
+      </section>
+
+      <!-- Slide 8: Web App Component -->
+      <section class="slide">
+        <h2 class="animate">Web App Interface</h2>
+        <ul class="animate delay-1">
+          <li>React-based dashboard for those away from the Unity editor.</li>
+          <li>Uses <code>getDisplayMedia</code> for browser-based screen sharing.</li>
+          <li>Live transcription history for auditing model logic.</li>
+          <li>Integrated chat for hybrid voice/text workflows.</li>
+        </ul>
+        <div class="placeholder-box animate delay-2">[Screenshot: Modern dark-mode Web App UI]</div>
+      </section>
+
+      <!-- Slide 9: Ease of Use -->
+      <section class="slide">
+        <h2 class="animate">Ease of Use & Accessibility</h2>
+        <ul class="animate delay-1">
+          <li><strong>Plug & Play</strong>: Drop scripts, hit Play, start talking.</li>
+          <li><strong>Multimodal</strong>: No need to copy-paste code; just show the screen.</li>
+          <li><strong>Context-Aware</strong>: Remembers your project structure via RAG.</li>
+          <li><strong>Zero Config</strong>: Defaults optimized for standard dev setups.</li>
+        </ul>
+      </section>
+
+      <!-- Slide 10: Conclusion -->
+      <section class="slide">
+        <h1>Game Development, <br>Reimagined.</h1>
+        <p class="animate delay-1">Thank you! Any Questions?</p>
+        <div class="animate delay-2" style="margin-top: 2rem;">
+          <p>Built with Gemini 2.0 Multimodal Live API</p>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="progress-bar" id="progress-bar"></div>
+
+    <div class="navigation-hint">
+      <span>← Left Arrow to Previous</span>
+      <span>Right Arrow to Next →</span>
+    </div>
+  </div>
+
+  <script>
+    const wrapper = document.getElementById('slides-wrapper');
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progress-bar');
+
+    let currentSlide = 0;
+
+    function updateSlide() {
+      wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+      slides.forEach((slide, index) => {
+        if (index === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      const progress = ((currentSlide + 1) / slides.length) * 100;
+      progressBar.style.width = `${progress}%`;
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        if (currentSlide < slides.length - 1) {
+          currentSlide++;
+          updateSlide();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateSlide();
+        }
+      }
+    });
+
+    // Initialize progress bar
+    updateSlide();
+  </script>
+</body>
+
+</html>
