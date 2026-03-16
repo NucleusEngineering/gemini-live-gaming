@@ -69,6 +69,14 @@ export class GeminiClient {
     this.lastFrameData = null;
   }
 
+  public sendText(text: string) {
+    if (!this.isRunning || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      console.warn("Cannot send text: GeminiClient is not running or socket is not open");
+      return;
+    }
+    this.ws.send(JSON.stringify({ type: "text", data: text }));
+  }
+
   private arrayBufferToBase64(buffer: ArrayBuffer): string {
     let binary = '';
     const bytes = new Uint8Array(buffer);

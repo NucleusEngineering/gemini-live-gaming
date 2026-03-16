@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GeminiClient } from './GeminiClient';
 import type { GeminiEvent } from './GeminiClient';
-import { Mic, Monitor, StopCircle, Play, AlertCircle, MessageSquare } from 'lucide-react';
+import { Mic, Monitor, StopCircle, Play, AlertCircle, MessageSquare, Send } from 'lucide-react';
 import './App.css';
 
 interface Message {
@@ -14,6 +14,7 @@ const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentGeminiText, setCurrentGeminiText] = useState('');
   const [currentUserText, setCurrentUserText] = useState('');
+  const [inputText, setInputText] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const clientRef = useRef<GeminiClient | null>(null);
@@ -96,7 +97,7 @@ const App: React.FC = () => {
       await clientRef.current?.start(url, token);
       setIsConnected(true);
       setMessages([]);
-    } catch (e) {
+    } catch {
       setError("Failed to start session. Is the backend running?");
     }
   };
@@ -104,6 +105,19 @@ const App: React.FC = () => {
   const handleStop = () => {
     clientRef.current?.stop();
     setIsConnected(false);
+  };
+
+  const handleSendText = () => {
+    if (inputText.trim() && isConnected) {
+      clientRef.current?.sendText(inputText);
+      setInputText('');
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSendText();
+    }
   };
 
   return (
@@ -157,6 +171,21 @@ const App: React.FC = () => {
           <div className="error-toast">
             <AlertCircle size={20} />
             <span>{error}</span>
+          </div>
+        )}
+
+        {isConnected && (
+          <div className="message-input-container">
+            <input
+              type="text"
+              placeholder="Type a message to Gemini..."
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyPress={handleKeyPress}
+            />
+            <button className="btn-send" onClick={handleSendText} disabled={!inputText.trim()}>
+              <Send size={18} />
+            </button>
           </div>
         )}
 
