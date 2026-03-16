@@ -279,8 +279,32 @@
         </ul>
         <div class="placeholder-box animate delay-2">[Image: Scripts in Unity Inspector]</div>
       </section>
-
-      <!-- Slide 6: Efficiency Secrets -->
+      
+      <!-- Slide 6: Tool Calling -->
+      <section class="slide">
+        <h2 class="animate">Tool Calling: Natural Language → Action</h2>
+        <div class="architecture-grid animate delay-1">
+          <div class="arch-node">
+            <h3>1. Decision</h3>
+            <p>Gemini hears "Jump" and calls <code>control_movement(action="JUMP")</code>.</p>
+          </div>
+          <div class="arch-node">
+            <h3>2. Bridge</h3>
+            <p>Backend forwards the tool event to Unity via WebSocket.</p>
+          </div>
+          <div class="arch-node">
+            <h3>3. Execution</h3>
+            <p>Unity's <strong>GeminiLiveClient</strong> triggers a C# Action.</p>
+          </div>
+        </div>
+        <div class="code-snippet animate delay-2">
+          <code>OnToolCallReceived?.Invoke(message.name, message.args?.action);</code>
+        </div>
+        <p class="animate delay-3">Enables complex interactions like controlling characters or modifying scene state via
+          voice.</p>
+      </section>
+      
+      <!-- Slide 7: Efficiency Secrets -->
       <section class="slide">
         <h2 class="animate">Efficiency: Frame Skipping</h2>
         <p class="animate delay-1">How we minimize bandwidth while maintaining multimodal understanding:</p>

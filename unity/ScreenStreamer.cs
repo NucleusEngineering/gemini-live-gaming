@@ -2,9 +2,12 @@ using UnityEngine;
 using System;
 using System.Collections;
 
-[RequireComponent(typeof(Camera))]
 public class ScreenStreamer : MonoBehaviour
 {
+    [Header("Capture Settings")]
+    [Tooltip("The camera used for capturing. If empty, Camera.main will be used.")]
+    public Camera targetCamera;
+
     [Tooltip("Frames per second to capture and send to Gemini. 1 FPS is usually sufficient.")]
     public float captureFPS = 1.0f;
     
@@ -14,15 +17,18 @@ public class ScreenStreamer : MonoBehaviour
     [Tooltip("Resolution scale (lower scale = smaller base64 size)")]
     public float resolutionScale = 0.5f;
 
-    private Camera targetCamera;
     private float nextCaptureTime = 0f;
 
     private void Start()
     {
-        targetCamera = GetComponent<Camera>();
         if (targetCamera == null)
         {
             targetCamera = Camera.main;
+        }
+
+        if (targetCamera == null)
+        {
+            Debug.LogError("ScreenStreamer: No camera found! Please assign a target camera.");
         }
     }
 

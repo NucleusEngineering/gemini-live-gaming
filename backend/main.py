@@ -120,7 +120,7 @@ def control_movement(action: str) -> str:
     """
     Controls the character movement in Unity.
     Args:
-        action (str): The action to perform. Can be "START_FORWARD" or "STOP".
+        action (str): The action to perform. Can be "START_FORWARD", "JUMP", or "STOP".
     """
     logger.info(f"Movement action triggered: {action}")
     return f"Movement action '{action}' triggered."
@@ -138,7 +138,8 @@ Use 'get_project_context' to see what files are available and 'read_project_file
 
 You can also control the game movement. 
 When the user says "move forward", call 'control_movement' with action "START_FORWARD".
-When the user says "Stop", call 'control_movement' with action "STOP".
+When the user says "Jump", call 'control_movement' with action "JUMP".
+When the user says "Stop movement", call 'control_movement' with action "STOP".
 Always confirm to the user that you are triggering the movement.
 """
 
