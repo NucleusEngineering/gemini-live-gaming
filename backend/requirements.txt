@@ -1,7 +1,7 @@
-fastapi>=0.111.0
-uvicorn[standard]>=0.30.0
-websockets>=12.0
-google-genai>=1.44
-pydantic>=2.4.2
-python-multipart>=0.0.9
-python-dotenv>=1.0.1
+fastapi
+uvicorn[standard]
+websockets
+google-genai>=1.67.0
+pydantic
+python-multipart
+python-dotenv
