@@ -9,7 +9,7 @@ public class AudioReceiver : MonoBehaviour
     private Queue<float> audioBuffer = new Queue<float>();
     
     [Tooltip("Gemini Live output sample rate")]
-    public float geminiSampleRate = 24000f; // Default for gemini-2.0-flash audio responses
+    public float geminiSampleRate = 24000f; // Default for gemini-3.1-flash-live audio responses
 
     private float fractionalIndex = 0f;
     private float currentSample = 0f;
@@ -18,15 +18,12 @@ public class AudioReceiver : MonoBehaviour
     // Buffering logic
     private bool isBuffering = true;
     private int minBufferSamples;
-    private int maxBufferSamples;
 
     private void Awake()
     {
         outputSampleRate = AudioSettings.outputSampleRate;
         // 200ms jitter buffer at Gemini's sample rate
         minBufferSamples = (int)(geminiSampleRate * 0.2f);
-        // 1 second max buffer before we start skipping to catch up
-        maxBufferSamples = (int)(geminiSampleRate * 1.0f);
     }
 
     private void Start()
@@ -41,6 +38,7 @@ public class AudioReceiver : MonoBehaviour
         if (GeminiLiveClient.Instance != null)
         {
             GeminiLiveClient.Instance.OnAudioReceived += HandleAudioReceived;
+            GeminiLiveClient.Instance.OnInterrupted += HandleInterrupted;
         }
         else
         {
@@ -53,6 +51,7 @@ public class AudioReceiver : MonoBehaviour
         if (GeminiLiveClient.Instance != null)
         {
             GeminiLiveClient.Instance.OnAudioReceived -= HandleAudioReceived;
+            GeminiLiveClient.Instance.OnInterrupted -= HandleInterrupted;
         }
     }
 
@@ -74,6 +73,17 @@ public class AudioReceiver : MonoBehaviour
         }
     }
 
+    private void HandleInterrupted()
+    {
+        lock (audioBuffer)
+        {
+            audioBuffer.Clear();
+            isBuffering = true;
+            fractionalIndex = 0f;
+            currentSample = 0f;
+        }
+    }
+
     private void OnAudioFilterRead(float[] data, int channels)
     {
         if (outputSampleRate == 0) return;
@@ -82,16 +92,6 @@ public class AudioReceiver : MonoBehaviour
 
         lock (audioBuffer)
         {
-            // Catch up logic: if buffer is too large, skip some samples
-            if (audioBuffer.Count > maxBufferSamples)
-            {
-                int samplesToSkip = audioBuffer.Count - minBufferSamples;
-                for (int s = 0; s < samplesToSkip; s++)
-                {
-                    audioBuffer.Dequeue();
-                }
-            }
-
             // Buffering logic
             if (isBuffering)
             {
@@ -131,7 +131,15 @@ public class AudioReceiver : MonoBehaviour
                     data[i + c] = currentSample;
                 }
                 
-                if (isBuffering) break; // Stop processing and wait for buffer
+                if (isBuffering)
+                {
+                    // Fill remaining buffer with silence to avoid click/pop/stale data playing
+                    for (int j = i + channels; j < data.Length; j++)
+                    {
+                        data[j] = 0f;
+                    }
+                    break;
+                }
             }
         }
     }

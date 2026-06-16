@@ -27,7 +27,7 @@ class GeminiLive:
         self.api_key = api_key
         self.model = model
         self.input_sample_rate = input_sample_rate
-        self.client = genai.Client(api_key=api_key, http_options={"api_version": "v1alpha"})
+        self.client = genai.Client(api_key=api_key, http_options={"api_version": "v1beta"})
         self.tools = tools or []
         self.tool_mapping = tool_mapping or {}
         self.system_instruction = system_instruction
@@ -66,8 +66,6 @@ If you see something else that is not related to the Unity Editor or gameplay, t
             system_instruction=types.Content(parts=[types.Part(text=system_instruction)]),
             input_audio_transcription=types.AudioTranscriptionConfig(),
             output_audio_transcription=types.AudioTranscriptionConfig(),
-            proactivity=types.ProactivityConfig(proactive_audio=True),
-            enable_affective_dialog=True,
             tools=live_tools,
         )
         

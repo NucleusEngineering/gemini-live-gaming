@@ -22,6 +22,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100%;
   max-width: 100%;
   margin: 0 auto;
   padding: 20px;
@@ -210,6 +211,26 @@ button {
 
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-mute {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+.btn-mute:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-mute.muted {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--error-color);
+}
+
+.btn-mute.muted:hover {
+  background: rgba(239, 68, 68, 0.25);
 }
 
 .indicators {

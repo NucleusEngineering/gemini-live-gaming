@@ -42,6 +42,7 @@ public class GeminiLiveClient : MonoBehaviour
     public event Action<string> OnTextReceived;
     public event Action<byte[]> OnAudioReceived;
     public event Action<string, string> OnToolCallReceived; // name, action
+    public event Action OnInterrupted;
 
     private void Awake()
     {
@@ -123,6 +124,11 @@ public class GeminiLiveClient : MonoBehaviour
                 {
                     Debug.Log($"GeminiLiveClient: Tool call received - {message.name} with action {message.args?.action}");
                     OnToolCallReceived?.Invoke(message.name, message.args?.action);
+                }
+                else if (message.type == "interrupted")
+                {
+                    Debug.Log("GeminiLiveClient: Interruption received.");
+                    OnInterrupted?.Invoke();
                 }
             }
             catch (Exception e)

@@ -1,6 +1,8 @@
 # Gemini Live Gamedev Assistant
 
-This project connects your Unity editor directly to the **Gemini 2.0 Multimodal Live API**, acting as a real-time pair-programming and debugging assistant that can see your screen and talk with you.
+This project connects your Unity editor directly to the **Gemini 3.1 Flash Live API**, acting as a real-time pair-programming and debugging assistant that can see your screen and talk with you.
+
+`https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-live-preview`
 
 ## System Components
 

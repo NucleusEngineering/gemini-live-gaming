@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GeminiClient } from './GeminiClient';
 import type { GeminiEvent } from './GeminiClient';
-import { Mic, Monitor, StopCircle, Play, AlertCircle, MessageSquare, Send } from 'lucide-react';
+import { Mic, MicOff, Monitor, StopCircle, Play, AlertCircle, MessageSquare, Send } from 'lucide-react';
 import './App.css';
 
 interface Message {
@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [currentUserText, setCurrentUserText] = useState('');
   const [inputText, setInputText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isMicMuted, setIsMicMuted] = useState(false);
 
   const clientRef = useRef<GeminiClient | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -88,6 +89,12 @@ const App: React.FC = () => {
       clientRef.current?.stop();
     };
   }, []);
+
+  useEffect(() => {
+    if (clientRef.current) {
+      clientRef.current.micMuted = isMicMuted;
+    }
+  }, [isMicMuted]);
 
   const handleStart = async () => {
     setError(null);
@@ -202,8 +209,13 @@ const App: React.FC = () => {
             </button>
           )}
 
+          <button className={`btn-mute ${isMicMuted ? 'muted' : ''}`} onClick={() => setIsMicMuted(!isMicMuted)} title={isMicMuted ? "Unmute Microphone" : "Mute Microphone"}>
+            {isMicMuted ? <MicOff size={20} /> : <Mic size={20} />}
+            <span>{isMicMuted ? "Mic Muted" : "Mute Mic"}</span>
+          </button>
+
           <div className="indicators">
-            <div className={`ind ${isConnected ? 'active' : ''}`} title="Microphone">
+            <div className={`ind ${isConnected && !isMicMuted ? 'active' : ''}`} title="Microphone">
               <Mic size={20} />
             </div>
             <div className={`ind ${isConnected ? 'active' : ''}`} title="Screen Share">
@@ -214,7 +226,7 @@ const App: React.FC = () => {
       </main>
 
       <footer>
-        <p>Built with Gemini 2.0 Multimodal Live API</p>
+        <p>Built with Gemini 3.1 Flash Live API</p>
       </footer>
     </div>
   );

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-MODEL = os.getenv("MODEL", "gemini-2.5-flash-native-audio-preview-12-2025") # Defaulting to flash if not set
+MODEL = os.getenv("MODEL", "gemini-2.5-flash-native-audio") # Defaulting to flash if not set
 
 async def test_resumption():
     client = GeminiLive(api_key=GEMINI_API_KEY, model=MODEL, input_sample_rate=16000)

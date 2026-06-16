@@ -17,6 +17,7 @@ export class GeminiClient {
   private isRunning = false;
   private nextPlayTime = 0;
   private lastFrameData: string | null = null;
+  public micMuted = false;
 
   constructor(onEvent: (event: GeminiEvent) => void, videoElement?: HTMLVideoElement) {
     this.onEvent = onEvent;
@@ -106,6 +107,7 @@ export class GeminiClient {
 
     processor.onaudioprocess = (e) => {
       if (!this.isRunning || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+      if (this.micMuted) return;
 
       const inputData = e.inputBuffer.getChannelData(0);
       // Convert to 16-bit PCM

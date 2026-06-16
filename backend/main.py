@@ -29,7 +29,7 @@ app.add_middleware(
 
 # Configuration
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-MODEL = os.getenv("MODEL", "gemini-2.5-flash-native-audio-preview-12-2025")
+MODEL = os.getenv("MODEL", "gemini-3.1-flash-live-preview")
 
 # Project Root for RAG tools
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -181,6 +181,7 @@ async def websocket_endpoint(websocket: WebSocket):
     actual_store_name = await loop.run_in_executor(None, ensure_file_search_store, client, store_name, storyline_path)
     
     file_search_store_names = [actual_store_name] if actual_store_name else None
+    # file_search_store_names = None
 
     async def audio_output_callback(data):
         # Convert audio bytes to base64 for Unity
@@ -234,6 +235,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
     async def run_session(resumption_token=None):
         while True:
+            if receive_task.done():
+                logger.info("Unity receive task is done. Exiting Gemini session loop.")
+                break
             try:
                 logger.info(f"Starting Gemini session (Resumption: {resumption_token is not None}).")
                 start_time = asyncio.get_event_loop().time()
@@ -251,11 +255,18 @@ async def websocket_endpoint(websocket: WebSocket):
                                 logger.info(f"Updated resumption token: {resumption_token[:10]}...")
                         
                         # Forward ALL events (including resumption) to client
-                        await websocket.send_text(json.dumps(event))
+                        try:
+                            await websocket.send_text(json.dumps(event))
+                        except (WebSocketDisconnect, RuntimeError) as e:
+                            logger.info(f"Client disconnected during send: {e}")
+                            break
                 
                 duration = asyncio.get_event_loop().time() - start_time
                 logger.info(f"Gemini session ended after {duration:.2f}s. Restarting...")
             except Exception as e:
+                if receive_task.done():
+                    logger.info("Unity receive task is done, ending Gemini session loop.")
+                    break
                 logger.error(f"Error in Gemini session: {e}. Restarting in 1s...", exc_info=True)
                 await asyncio.sleep(1)
 
