@@ -67,54 +67,7 @@ def read_project_file(file_path: str) -> str:
     except Exception as e:
         return f"Error reading file: {e}"
 
-def ensure_file_search_store(client: genai.Client, store_name: str, file_path: str) -> str:
-    """
-    Ensures a File Search Store exists and contains the specified file.
-    """
-    try:
-        # 1. Check if store exists
-        store = None
-        for s in client.file_search_stores.list():
-            if s.display_name == store_name:
-                store = s
-                break
-        
-        # 2. Create if not exists
-        if not store:
-            logger.info(f"Creating new File Search Store: {store_name}")
-            store = client.file_search_stores.create(config={"display_name": store_name})
-        
-        # 3. Sync file
-        abs_file_path = os.path.join(PROJECT_ROOT, file_path)
-        if os.path.exists(abs_file_path):
-            file_name = os.path.basename(file_path)
-            
-            logger.info(f"Uploading {file_path} to Gemini Files...")
-            uploaded_file = client.files.upload(file=abs_file_path, config={"display_name": file_name})
-            file_uri = uploaded_file.name
 
-            # Check if file is in store
-            file_in_store = False
-            # Note: file_search_stores.files.list() might not be available directly in all versions, 
-            # but we can try to add the file to the store anyway, it should be idempotent or we can check.
-            # For simplicity, we add it. 
-            logger.info(f"Adding file {file_name} to store {store_name}")
-            try:
-                client.file_search_stores.import_file(
-                    file_search_store_name=store.name,
-                    file_name=file_uri
-                )
-            except Exception as e:
-                # If already exists, it might error. We can ignore if it's already there.
-                if "already exists" in str(e).lower():
-                    pass
-                else:
-                    logger.warning(f"Note on adding file to store: {e}")
-
-        return store.name
-    except Exception as e:
-        logger.error(f"Error in ensure_file_search_store: {e}")
-        return None
 
 def control_movement(action: str) -> str:
     """
@@ -170,19 +123,6 @@ async def websocket_endpoint(websocket: WebSocket):
     video_input_queue = asyncio.Queue()
     text_input_queue = asyncio.Queue()
 
-    # Initialize client and ensure store
-    client = genai.Client(api_key=GEMINI_API_KEY)
-    store_name = "GamedevLiveStore"
-    storyline_path = "secret-documentation-data/STORYLINE.md"
-    
-    # Run store management in a thread to not block the async loop if needed, 
-    # but here it's fine as we are at the start of the websocket connection.
-    loop = asyncio.get_running_loop()
-    actual_store_name = await loop.run_in_executor(None, ensure_file_search_store, client, store_name, storyline_path)
-    
-    file_search_store_names = [actual_store_name] if actual_store_name else None
-    # file_search_store_names = None
-
     async def audio_output_callback(data):
         # Convert audio bytes to base64 for Unity
         audio_b64 = base64.b64encode(data).decode('utf-8')
@@ -198,8 +138,7 @@ async def websocket_endpoint(websocket: WebSocket):
             "get_project_context": get_project_context,
             "read_project_file": read_project_file,
             "control_movement": control_movement
-        },
-        file_search_store_names=file_search_store_names
+        }
     )
 
     async def receive_from_unity():

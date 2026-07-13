@@ -11,7 +11,7 @@ class GeminiLive:
     """
     Handles the interaction with the Gemini Live API.
     """
-    def __init__(self, api_key, model, input_sample_rate, tools=None, tool_mapping=None, system_instruction=None, file_search_store_names=None):
+    def __init__(self, api_key, model, input_sample_rate, tools=None, tool_mapping=None, system_instruction=None):
         """
         Initializes the GeminiLive client.
 
@@ -22,7 +22,6 @@ class GeminiLive:
             tools (list, optional): List of tools to enable. Defaults to None.
             tool_mapping (dict, optional): Mapping of tool names to functions. Defaults to None.
             system_instruction (str, optional): The system instruction to use. Defaults to None.
-            file_search_store_names (list, optional): List of file search store names. Defaults to None.
         """
         self.api_key = api_key
         self.model = model
@@ -31,7 +30,6 @@ class GeminiLive:
         self.tools = tools or []
         self.tool_mapping = tool_mapping or {}
         self.system_instruction = system_instruction
-        self.file_search_store_names = file_search_store_names
 
     async def start_session(self, audio_input_queue, video_input_queue, text_input_queue, audio_output_callback, audio_interrupt_callback=None):
 
@@ -47,12 +45,8 @@ Keep responses concise and helpful.
 If you see something else that is not related to the Unity Editor or gameplay, tell use to go back to the right context.
 """
 
-        # Prepare tools including file_search if available
+        # Prepare tools
         live_tools = list(self.tools)
-        if self.file_search_store_names:
-            live_tools.append(
-                types.Tool(file_search=types.FileSearch(file_search_store_names=self.file_search_store_names))
-            )
 
         config = types.LiveConnectConfig(
             response_modalities=[types.Modality.AUDIO],
