@@ -19,6 +19,17 @@ public class AudioReceiver : MonoBehaviour
     private bool isBuffering = true;
     private int minBufferSamples;
 
+    public bool IsPlayingAudio
+    {
+        get
+        {
+            lock (audioBuffer)
+            {
+                return !isBuffering && audioBuffer.Count > 0;
+            }
+        }
+    }
+
     private void Awake()
     {
         outputSampleRate = AudioSettings.outputSampleRate;

@@ -18,6 +18,7 @@ export class GeminiClient {
   private nextPlayTime = 0;
   private lastFrameData: string | null = null;
   public micMuted = false;
+  private activeSources: Set<AudioBufferSourceNode> = new Set();
 
   constructor(onEvent: (event: GeminiEvent) => void, videoElement?: HTMLVideoElement) {
     this.onEvent = onEvent;
@@ -44,7 +45,7 @@ export class GeminiClient {
         setTimeout(() => reject(new Error("Timeout")), 5000);
       });
 
-      this.audioContext = new AudioContext({ sampleRate: 24000 });
+      this.audioContext = new AudioContext();
       this.nextPlayTime = this.audioContext.currentTime;
 
       await this.startMicrophone();
@@ -68,6 +69,7 @@ export class GeminiClient {
     this.screenStream = null;
     this.audioContext = null;
     this.lastFrameData = null;
+    this.activeSources.clear();
   }
 
   public sendText(text: string) {
@@ -88,32 +90,52 @@ export class GeminiClient {
     return window.btoa(binary);
   }
 
+  private resample(inputBuffer: Float32Array, inSampleRate: number, outSampleRate: number): Float32Array {
+    if (inSampleRate === outSampleRate) {
+      return inputBuffer;
+    }
+    const samples = inputBuffer.length;
+    const outSamples = Math.round(samples * outSampleRate / inSampleRate);
+    const result = new Float32Array(outSamples);
+    const ratio = (samples - 1) / (outSamples - 1);
+    for (let i = 0; i < outSamples; i++) {
+      const p = i * ratio;
+      const index = Math.floor(p);
+      const fraction = p - index;
+      const nextIndex = index + 1 < samples ? index + 1 : index;
+      result[i] = inputBuffer[index] * (1 - fraction) + inputBuffer[nextIndex] * fraction;
+    }
+    return result;
+  }
+
   private async startMicrophone() {
+    if (!this.audioContext) return;
+
     this.micStream = await navigator.mediaDevices.getUserMedia({
       audio: {
-        sampleRate: 16000,
         channelCount: 1,
         echoCancellation: true,
         noiseSuppression: true,
       },
     });
 
-    const micContext = new AudioContext({ sampleRate: 16000 });
-    const source = micContext.createMediaStreamSource(this.micStream);
-    const processor = micContext.createScriptProcessor(4096, 1, 1);
+    const source = this.audioContext.createMediaStreamSource(this.micStream);
+    const processor = this.audioContext.createScriptProcessor(4096, 1, 1);
 
     source.connect(processor);
-    processor.connect(micContext.destination);
+    processor.connect(this.audioContext.destination);
 
     processor.onaudioprocess = (e) => {
-      if (!this.isRunning || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+      if (!this.isRunning || !this.ws || this.ws.readyState !== WebSocket.OPEN || !this.audioContext) return;
       if (this.micMuted) return;
 
       const inputData = e.inputBuffer.getChannelData(0);
+      const resampledData = this.resample(inputData, this.audioContext.sampleRate, 16000);
+
       // Convert to 16-bit PCM
-      const pcm16 = new Int16Array(inputData.length);
-      for (let i = 0; i < inputData.length; i++) {
-        pcm16[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7fff;
+      const pcm16 = new Int16Array(resampledData.length);
+      for (let i = 0; i < resampledData.length; i++) {
+        pcm16[i] = Math.max(-1, Math.min(1, resampledData[i])) * 0x7fff;
       }
 
       const base64 = this.arrayBufferToBase64(pcm16.buffer);
@@ -207,6 +229,11 @@ export class GeminiClient {
     source.buffer = buffer;
     source.connect(this.audioContext.destination);
 
+    this.activeSources.add(source);
+    source.onended = () => {
+      this.activeSources.delete(source);
+    };
+
     // Dynamic playback time to avoid gaps
     const now = this.audioContext.currentTime;
     if (this.nextPlayTime < now) {
@@ -218,16 +245,16 @@ export class GeminiClient {
   }
 
   private interruptAudio() {
-    // In a real implementation, we would want to stop the currently playing source.
-    // However, AudioBufferSourceNode is fire-and-forget unless we keep track of them.
-    // For simplicity, we can just close and recreate the audio context or maintain a list.
-    // Let's just reset the nextPlayTime for now.
-    // Actually, it's better to keep track of active sources.
+    this.activeSources.forEach((src) => {
+      try {
+        src.stop();
+      } catch (e) {
+        // Already stopped or not started
+      }
+    });
+    this.activeSources.clear();
 
-    // Simple approach: reset context
     if (this.audioContext) {
-      this.audioContext.close();
-      this.audioContext = new AudioContext({ sampleRate: 24000 });
       this.nextPlayTime = this.audioContext.currentTime;
     }
   }

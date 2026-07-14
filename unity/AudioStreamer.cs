@@ -10,9 +10,13 @@ public class AudioStreamer : MonoBehaviour
     [Tooltip("Microphone device name. Leave empty for default.")]
     public string micDeviceName = "";
 
+    [Tooltip("If enabled, mutes the microphone while Gemini is speaking to prevent echo/feedback loops.")]
+    public bool enableEchoReduction = true;
+
     private AudioClip micClip;
     private int lastSamplePosition = 0;
     private bool isRecording = false;
+    private AudioReceiver audioReceiver;
 
     private void Start()
     {
@@ -49,6 +53,21 @@ public class AudioStreamer : MonoBehaviour
 
         int currentPosition = Microphone.GetPosition(micDeviceName);
         if (currentPosition < 0 || lastSamplePosition == currentPosition) return;
+
+        // If echo reduction is active and Gemini is speaking, we discard the captured microphone data
+        if (enableEchoReduction)
+        {
+            if (audioReceiver == null)
+            {
+                audioReceiver = FindObjectOfType<AudioReceiver>();
+            }
+
+            if (audioReceiver != null && audioReceiver.IsPlayingAudio)
+            {
+                lastSamplePosition = currentPosition;
+                return;
+            }
+        }
 
         int sampleCount;
         if (currentPosition > lastSamplePosition)
