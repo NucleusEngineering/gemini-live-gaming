@@ -4,6 +4,13 @@ This project connects your Unity editor directly to the **Gemini 3.1 Flash Live 
 
 `https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-live-preview`
 
+## Preview
+
+Application for live audio and video streaming:
+![preview 1](presentation/images/readme2.png "Preview 1")
+Unity editor integration:
+![preview 2](presentation/images/readme1.png "Preview 2")
+
 ## System Components
 
 1. **Backend Middleware (`/backend`)**: A minimal Google Cloud Run Python FastAPI service that bridges basic WebSockets to Google's official `google-genai` async SDK.
